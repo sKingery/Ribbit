@@ -1,36 +1,17 @@
 package com.skingery.ribbit.app;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 
-public class LoginActivity extends Activity {
-
-    protected TextView mSignUpTextView; // sign up text view
+public class SignUpActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        mSignUpTextView =(TextView) findViewById(R.id.signUpText);
-
-        // set on click for the sign up text view
-        mSignUpTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                // on click we create and intent to open SignUpActivity
-                Intent intent = new Intent(LoginActivity.this,SignUpActivity.class);
-                startActivity(intent);
-
-            }
-        });
+        setContentView(R.layout.activity_sign_up);
     }
 
 
@@ -38,7 +19,7 @@ public class LoginActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.login, menu);
+        getMenuInflater().inflate(R.menu.sign_up, menu);
         return true;
     }
 

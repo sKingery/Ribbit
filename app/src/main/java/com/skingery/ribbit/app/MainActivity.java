@@ -42,7 +42,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // intent to start login activity oncreation
         Intent intent = new Intent(this,LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // flag to start the new task of logging in
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // flag to clear the old task of starting the app
         startActivity(intent);
 
         // Set up the action bar.
