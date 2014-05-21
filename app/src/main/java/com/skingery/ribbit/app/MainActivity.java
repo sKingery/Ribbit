@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,9 +22,12 @@ import android.widget.TextView;
 
 import com.parse.ParseAnalytics;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -48,11 +52,21 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         // parse analytics call
         ParseAnalytics.trackAppOpened(getIntent());
 
-        // intent to start login activity oncreation
-        Intent intent = new Intent(this,LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // flag to start the new task of logging in
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // flag to clear the old task of starting the app
-        startActivity(intent);
+        // to start login activity on creation
+        ParseUser currentUser = ParseUser.getCurrentUser(); // create a current user object
+
+        // if the current user is not in the system
+        if(currentUser == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // flag to start the new task of logging in
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // flag to clear the old task of starting the app
+            startActivity(intent);
+        }
+
+
+        else{
+            Log.i(TAG, currentUser.getUsername()); // Log the username
+        }
 
 
 
