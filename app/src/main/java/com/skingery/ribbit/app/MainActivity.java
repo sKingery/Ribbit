@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TextView;
 
 import com.parse.ParseAnalytics;
@@ -57,10 +58,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
         // if the current user is not in the system
         if(currentUser == null) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // flag to start the new task of logging in
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // flag to clear the old task of starting the app
-            startActivity(intent);
+            navigateToLogin();
         }
 
 
@@ -107,6 +105,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
     }
 
+    private void navigateToLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // flag to start the new task of logging in
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK); // flag to clear the old task of starting the app
+        startActivity(intent);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -121,10 +126,15 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        int itemId = item.getItemId(); // get the item id
+        // check to see if the id is logout
+        if(itemId == R.id.action_logout){
+
+            ParseUser.logOut(); // logout the user
+            navigateToLogin(); // switch to the login screen
+
+    }
+
         return super.onOptionsItemSelected(item);
     }
 
