@@ -135,6 +135,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             navigateToLogin(); // switch to the login screen
 
     }
+        else if(itemId == R.id.action_edit_friends){
+
+            Intent intent = new Intent(this, EditFriendsActivity.class);
+            startActivity(intent);
+        }
 
         return super.onOptionsItemSelected(item);
     }
