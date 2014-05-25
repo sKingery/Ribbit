@@ -7,15 +7,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseRelation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.List;
 
@@ -24,18 +28,28 @@ public class EditFriendsActivity extends ListActivity {
     public static final String TAG = EditFriendsActivity.class.getSimpleName();
 
     protected List<ParseUser> mUsers;
+    protected ParseRelation<ParseUser> mFriendsRelation;
+    protected ParseUser mCurrentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS); // request the progress indicator in the action bar
         setContentView(R.layout.activity_edit_friends);
+
+        // ge the list view and set it so user can check or uncheck friends
+        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         setProgressBarIndeterminateVisibility(true); // show progress indicator
+
+        // set mCurrentUser as the current ParseUser
+        mCurrentUser = ParseUser.getCurrentUser();
+        // set mFriendsRelation as the current users relation
+        mFriendsRelation = mCurrentUser.getRelation(ParseConstants.KEY_FRIENDS_RELATION);
 
         // create a parse query to ge the users
         ParseQuery<ParseUser> query = ParseUser.getQuery();
@@ -65,6 +79,8 @@ public class EditFriendsActivity extends ListActivity {
                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditFriendsActivity.this,
                            android.R.layout.simple_list_item_checked, usernames);
                    setListAdapter(adapter);
+
+                   addFriendCheckmarks();
 
                }
                 else{
@@ -104,4 +120,58 @@ public class EditFriendsActivity extends ListActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        //check to see if the item is really checked or not
+        if(getListView().isItemChecked(position)){
+            //add friend
+            mFriendsRelation.add(mUsers.get(position)); // add the info from the users by the position of the username in the list
+            // Save the changes to the back end
+            mCurrentUser.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    //if there is an exception
+                    if(e != null){
+                        Log.e(TAG, e.getMessage());
+                    }
+                }
+            });
+        }
+
+        else{
+            // remove friend
+        }
+
+    }
+
+    private void addFriendCheckmarks(){
+        // get the list of the users current friends
+        mFriendsRelation.getQuery().findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> friends, ParseException e) {
+                if(e == null){
+                    //list returned -- look for match
+                    for(int i = 0; i < mUsers.size(); i++){ // loop through all users
+                        ParseUser user = mUsers.get(i);
+
+                        for(ParseUser friend: friends){
+                            if(friend.getObjectId().equals(user.getObjectId())){
+                                // set check mark
+                                getListView().setItemChecked(i, true);
+                            }
+                        }
+                    }
+
+                }
+
+                    else{
+                        Log.e(TAG, e.getMessage());
+                }
+            }
+        });
+
+
+    }
 }
