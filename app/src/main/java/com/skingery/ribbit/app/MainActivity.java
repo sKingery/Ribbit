@@ -313,6 +313,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 sendBroadcast(mediaScanIntent);
             }
 
+            // start the RecipientsActivity
+            Intent recipientsIntent = new Intent(this, RecipientsActivity.class);
+            recipientsIntent.setData(mMediaUri);
+            startActivity(recipientsIntent);
+
 
         }
         else if (resultCode != RESULT_CANCELED){
@@ -348,10 +353,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             case R.id.action_logout:
                 ParseUser.logOut(); // logout the user
                 navigateToLogin(); // switch to the login screen
+                break;
                 //user selects edit friends
             case R.id.action_edit_friends:
                 Intent intent = new Intent(this, EditFriendsActivity.class);
                 startActivity(intent);
+                break;
                 // user selects camera
             case R.id.action_camera:
                 // create alert dialog
@@ -359,6 +366,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 builder.setItems(R.array.camera_choices, mDialogListener); // set items from string array
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
