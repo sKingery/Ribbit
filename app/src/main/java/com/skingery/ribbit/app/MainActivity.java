@@ -2,6 +2,9 @@ package com.skingery.ribbit.app;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -50,6 +53,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public static final int MEDIA_TYPE_IMAGE = 4;
     public static final int MEDIA_TYPE_VIDEO = 5;
 
+    public static final int FILE_SIZE_LIMIT = 1024 * 1024 * 10; // 10 MB
+
     protected Uri mMediaUri;
 
 
@@ -72,13 +77,32 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     }
                     break;
                 case 1: //Take video
-                    Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                    startActivityForResult(takeVideoIntent,TAKE_VIDEO_REQUEST);
+                    Intent videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                    mMediaUri = getOutPutMediaFileUri(MEDIA_TYPE_VIDEO);
+                    if(mMediaUri == null){
+                        //display error
+                        Toast.makeText(MainActivity.this,R.string.error_external_storage, Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, mMediaUri);
+                        videoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 10); // set video duration limit to 10 seconds
+                        videoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0); // set video quality to lowest resolution
+                        startActivityForResult(videoIntent, TAKE_VIDEO_REQUEST);
+                    }
+
                     break;
                 case 2: //Choose picture
+                    Intent choosePhotoIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    choosePhotoIntent.setType("image/*"); // set type so only images will be given as an option
+                    startActivityForResult(choosePhotoIntent,PICK_PHOTO_REQUEST);
 
                     break;
                 case 3: //Choose video
+                    Intent chooseVideoIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    chooseVideoIntent.setType("video/*"); // set type so only videos will be given as an option
+                    Toast.makeText(MainActivity.this, getString(R.string.video_file_size_warning), Toast.LENGTH_LONG).show();
+                    startActivityForResult(chooseVideoIntent,PICK_VIDEO_REQUEST);
+
                     break;
 
             }
@@ -226,6 +250,73 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     actionBar.newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // check to see if result came back normally
+        if(resultCode == RESULT_OK){
+
+            // if the result is from the choose photo or video options
+            if(requestCode == PICK_PHOTO_REQUEST
+                    || requestCode == PICK_VIDEO_REQUEST){
+
+                // of there is no data
+                if(data == null){
+                    // show error message
+                    Toast.makeText(this, getString(R.string.general_error), Toast.LENGTH_LONG).show();
+                }
+                else{
+                    // The Intent has data set the Uri
+                    mMediaUri = data.getData();
+                }
+                Log.i(TAG, "Media Uri" + mMediaUri);
+                if(requestCode == PICK_VIDEO_REQUEST){ // if the file type is video
+                    // make sure the file is less than 10MB
+                    int fileSize = 0;
+                    InputStream inputStream = null;
+                    try {
+                        // open an input stream to the file
+                        inputStream = getContentResolver().openInputStream(mMediaUri);
+                        fileSize = inputStream.available();
+                    }
+                    catch (FileNotFoundException e){
+                        Toast.makeText(this, getString(R.string.error_opening_file), Toast.LENGTH_LONG).show();
+                        return; // return to go back to the activity
+                    }
+                    catch (IOException e){
+                        Toast.makeText(this, getString(R.string.error_opening_file), Toast.LENGTH_LONG).show();
+                        return; // return to go back to the activity
+                    }
+                    // close  stream
+                    finally {
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                          // Intentionally blank
+                        }
+                    }
+                    if (fileSize >= FILE_SIZE_LIMIT){
+                        Toast.makeText(this, getString(R.string.error_file_size_too_large), Toast.LENGTH_LONG).show();
+                        return; // return to go back to the activity
+                    }
+
+                }
+
+            }
+            else {
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(mMediaUri); // specify path to the file
+                sendBroadcast(mediaScanIntent);
+            }
+
+
+        }
+        else if (resultCode != RESULT_CANCELED){
+            Toast.makeText(this, getString(R.string.general_error), Toast.LENGTH_LONG).show();
         }
     }
 
