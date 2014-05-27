@@ -14,10 +14,12 @@ import android.widget.ListView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -116,6 +118,9 @@ public class RecipientsActivity extends ListActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_send) {
+            // send the message
+            ParseObject message = createMessage();
+            //send(message);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -134,5 +139,37 @@ public class RecipientsActivity extends ListActivity {
             // set menu item to hide
             mSendMenuItem.setVisible(false);
         }
+    }
+
+    protected ParseObject createMessage(){
+        // create a new ParseObject for the message
+        ParseObject message = new ParseObject(ParseConstants.CLASS_MESSAGES);
+        // get the sender/current user id
+        message.put(ParseConstants.KEY_SENDER_ID, ParseUser.getCurrentUser().getObjectId());
+        // get the senders/ current user username
+        message.put(ParseConstants.KEY_SENDER_NAME, ParseUser.getCurrentUser().getUsername());
+        // get the recipient id
+        message.put(ParseConstants.KEY_RECIPIENT_IDS, getRecipientIds());
+
+        // return the message
+        return message;
+
+    }
+
+    protected ArrayList<String> getRecipientIds(){
+        // create a new ArrayList
+        ArrayList<String> recipientIds = new ArrayList<String>();
+        // loop through the list items and add everybody who is checked
+        for(int i = 0; i < getListView().getCount(); i++ ){
+
+            if(getListView().isItemChecked(i)){ // if the item in the list view is checked
+                // add the person to the array list
+                recipientIds.add(mFriends.get(i).getObjectId());
+
+            }
+        }
+        // return the recipient ids
+        return recipientIds;
+
     }
 }
