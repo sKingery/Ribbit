@@ -3,6 +3,7 @@ package com.skingery.ribbit.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -11,13 +12,16 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +34,8 @@ public class RecipientsActivity extends ListActivity {
     protected List<ParseUser> mFriends;
     protected ParseRelation<ParseUser> mFriendsRelation;
     protected ParseUser mCurrentUser;
+    protected Uri mMediaUri;
+    protected String mFileType;
 
     protected MenuItem mSendMenuItem;
 
@@ -40,6 +46,10 @@ public class RecipientsActivity extends ListActivity {
         setContentView(R.layout.activity_recipients);
         // set the list choice mode so user can check or uncheck friends
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+        // get the media url intent
+        mMediaUri = getIntent().getData();
+        mFileType = getIntent().getExtras().getString(ParseConstants.KEY_FILE_TYPE);
     }
 
     @Override
@@ -120,8 +130,22 @@ public class RecipientsActivity extends ListActivity {
         if (id == R.id.action_send) {
             // send the message
             ParseObject message = createMessage();
-            //send(message);
+            if(message == null){
+                //error
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(getString(R.string.error_selecting_file))
+                        .setTitle(getString(R.string.error_selecting_file_title))
+                        .setPositiveButton(android.R.string.ok, null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+            else {
+                // send message and finish activity to send user back to main
+                send(message);
+                finish();
+            }
             return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -150,9 +174,36 @@ public class RecipientsActivity extends ListActivity {
         message.put(ParseConstants.KEY_SENDER_NAME, ParseUser.getCurrentUser().getUsername());
         // get the recipient id
         message.put(ParseConstants.KEY_RECIPIENT_IDS, getRecipientIds());
+        // get the file type
+        message.put(ParseConstants.KEY_FILE_TYPE, mFileType);
 
-        // return the message
-        return message;
+        // create byte array
+        byte[] fileBytes = FileHelper.getByteArrayFromFile(this, mMediaUri);
+
+        if(fileBytes == null){
+            // then there was a problem, return null for the message
+            return null;
+        }
+
+        else{
+           // if file type is  image
+           if (mFileType.equals(ParseConstants.TYPE_IMAGE)){
+               // reduce the size of the file store it back in fileBytes
+               fileBytes = FileHelper.reduceImageForUpload(fileBytes);
+           }
+
+            // set the file name
+            String fileName = FileHelper.getFileName(this, mMediaUri, mFileType);
+            // create a new ParseFile
+            ParseFile file = new ParseFile(fileName, fileBytes);
+            // attach file to the ParseObject message
+            message.put(ParseConstants.KEY_FILE, file);
+
+            // return the message
+            return message;
+        }
+
+
 
     }
 
@@ -171,5 +222,29 @@ public class RecipientsActivity extends ListActivity {
         // return the recipient ids
         return recipientIds;
 
+    }
+
+    protected void send(ParseObject message){
+        // save in the background
+        message.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if(e == null){
+                    //success
+                    Toast.makeText(RecipientsActivity.this, getString(R.string.success_message), Toast.LENGTH_LONG).show();
+                }
+
+                else{
+                    // there was an error
+                    AlertDialog.Builder builder = new AlertDialog.Builder(RecipientsActivity.this);
+                    builder.setMessage(getString(R.string.error_sending_message))
+                            .setTitle(getString(R.string.error_selecting_file_title))
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+
+            }
+        });
     }
 }

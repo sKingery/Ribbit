@@ -316,6 +316,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             // start the RecipientsActivity
             Intent recipientsIntent = new Intent(this, RecipientsActivity.class);
             recipientsIntent.setData(mMediaUri);
+            String fileType;
+            if(requestCode == PICK_PHOTO_REQUEST || requestCode == TAKE_PHOTO_REQUEST){
+
+                fileType = ParseConstants.TYPE_IMAGE;
+
+            }
+
+            else {
+
+                fileType = ParseConstants.TYPE_VIDEO;
+            }
+
+            recipientsIntent.putExtra(ParseConstants.KEY_FILE_TYPE, fileType);
             startActivity(recipientsIntent);
 
 
@@ -366,6 +379,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 builder.setItems(R.array.camera_choices, mDialogListener); // set items from string array
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                break;
+                //user selects the message button
+            case R.id.action_message:
+                //create intent to launch Text Message Activity
+                Intent messageIntent = new Intent(this, TextMessageActivty.class);
+                startActivity(messageIntent);
                 break;
         }
 
