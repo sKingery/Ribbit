@@ -13,10 +13,10 @@
         android:icon="@drawable/ic_action_camera"
         android:showAsAction="always"/>
 
-    <item android:id="@+id/action_message"
+   <!-- <item android:id="@+id/action_message"
         android:title="@string/menu_message_label"
         android:icon="@drawable/ic_action_email"
-        android:showAsAction="always"/>
+        android:showAsAction="always"/> -->
 
 
 
