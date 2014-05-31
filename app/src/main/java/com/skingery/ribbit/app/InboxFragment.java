@@ -52,7 +52,7 @@ public class InboxFragment extends ListFragment {
                 // dismiss progress indicator
                 getActivity().setProgressBarIndeterminate(false);
 
-                if(e == null){
+                if (e == null) {
                     // we found messages!
                     // set mMessage with the messages variable
                     mMessages = messages;
@@ -66,11 +66,11 @@ public class InboxFragment extends ListFragment {
                     }
                     // create array adapter and set it as the adapter for this activity
                     // Call getListView() and getContext() to get the context since fragment doesn't extend activity or context
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getListView().getContext(),
-                            android.R.layout.simple_list_item_1, usernames);
+                    MessageAdapter adapter = new MessageAdapter(getListView().getContext(), mMessages);
                     setListAdapter(adapter);
 
                 }
+
 
             }
         });
