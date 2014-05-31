@@ -68,11 +68,16 @@ public class InboxFragment extends ListFragment {
                         usernames[i] = message.getString(ParseConstants.KEY_SENDER_NAME); // set string array based on i to the username of current user
                         i++; // increment i
                     }
-                    // create array adapter and set it as the adapter for this activity
+                    // create message adapter if it doesn't already exist and set it as the adapter for this activity
                     // Call getListView() and getContext() to get the context since fragment doesn't extend activity or context
-                    MessageAdapter adapter = new MessageAdapter(getListView().getContext(), mMessages);
-                    setListAdapter(adapter);
+                    if(getListView().getAdapter() == null){
+                        MessageAdapter adapter = new MessageAdapter(getListView().getContext(), mMessages);
+                        setListAdapter(adapter);}
 
+                }
+                else{
+                    //refill the adapter if it already exists to keep track of users position
+                    ((MessageAdapter)getListView().getAdapter()).refill(mMessages);
                 }
 
 

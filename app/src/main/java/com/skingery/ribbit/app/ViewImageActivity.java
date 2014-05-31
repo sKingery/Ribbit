@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 import java.net.URI;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class ViewImageActivity extends Activity {
@@ -25,6 +27,17 @@ public class ViewImageActivity extends Activity {
         Uri imageUri = getIntent().getData();
         // load the image with picasso
         Picasso.with(this).load(imageUri.toString()).into(imageView);
+
+        // create a timer and send user back to inbox after a certain amount of time has passed
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                finish(); // finish current activity to go back to inbox
+            }
+        }, 10*1000); // set the timer for 10 seconds (10 *1000 = 10,000 milliseconds)
+
+
 
     }
 

@@ -40,6 +40,7 @@ public class MessageAdapter extends ArrayAdapter<ParseObject> {
             holder = new ViewHolder();
             holder.iconImageView = (ImageView) convertView.findViewById(R.id.messageIcon);
             holder.nameLabel = (TextView) convertView.findViewById(R.id.senderLabel);
+            convertView.setTag(holder);
         }
         else{
             // the holder exists so use it
@@ -66,6 +67,17 @@ public class MessageAdapter extends ArrayAdapter<ParseObject> {
     private static class ViewHolder{
         ImageView iconImageView;
         TextView nameLabel;
+
+    }
+
+    // method to refill the adapter
+    public void refill(List<ParseObject> messages){
+
+        mMessages.clear(); //clear the current data
+        mMessages.addAll(messages); // add the new messages
+        notifyDataSetChanged();
+
+
 
     }
 }
