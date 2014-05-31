@@ -47,5 +47,6 @@
     <string name="title_activity_text_message_activty">TextMessageActivty</string>
     <string name="menu_message_label">Message</string>
     <string name="type_message_hint">Type Message Here</string>
+    <string name="title_activity_view_image">ViewImageActivity</string>
 
 </resources>

@@ -1,14 +1,18 @@
 package com.skingery.ribbit.app;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -74,5 +78,34 @@ public class InboxFragment extends ListFragment {
 
             }
         });
+    }
+
+    // to launch the ViewImageActivity when it is clicked
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+
+        // get the message type
+        ParseObject message = mMessages.get(position);
+       String messageType = message.getString(ParseConstants.KEY_FILE_TYPE);
+       // get the ParseFile or the message
+        ParseFile file = message.getParseFile(ParseConstants.KEY_FILE);
+        // create a Uri and set it to the files URL
+        Uri fileUri = Uri.parse(file.getUrl());
+
+        // check if message type is image
+        if(messageType.equals(ParseConstants.TYPE_IMAGE)){
+            // view the image in the ViewImageActivity
+            Intent intent = new Intent(getActivity(),ViewImageActivity.class);
+            intent.setData(fileUri); // set the date of the intent with the file uri
+            startActivity(intent);
+
+
+        }
+
+        else{
+            // view the video
+        }
+
     }
 }

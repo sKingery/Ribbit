@@ -52,8 +52,14 @@
         <activity
             android:name="com.skingery.ribbit.app.TextMessageActivty"
             android:label="@string/title_activity_text_message_activty"
+            android:parentActivityName="com.skingery.ribbit.app.MainActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.skingery.ribbit.app.ViewImageActivity"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity">
+            android:label="@string/app_name" >
         </activity>
     </application>
 
