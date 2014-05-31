@@ -17,6 +17,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -70,14 +71,14 @@ public class InboxFragment extends ListFragment {
                     }
                     // create message adapter if it doesn't already exist and set it as the adapter for this activity
                     // Call getListView() and getContext() to get the context since fragment doesn't extend activity or context
-                    if(getListView().getAdapter() == null){
+                    if (getListView().getAdapter() == null) {
                         MessageAdapter adapter = new MessageAdapter(getListView().getContext(), mMessages);
-                        setListAdapter(adapter);}
+                        setListAdapter(adapter);
+                    }
 
-                }
-                else{
+                } else {
                     //refill the adapter if it already exists to keep track of users position
-                    ((MessageAdapter)getListView().getAdapter()).refill(mMessages);
+                    ((MessageAdapter) getListView().getAdapter()).refill(mMessages);
                 }
 
 
@@ -92,28 +93,46 @@ public class InboxFragment extends ListFragment {
 
         // get the message type
         ParseObject message = mMessages.get(position);
-       String messageType = message.getString(ParseConstants.KEY_FILE_TYPE);
-       // get the ParseFile or the message
+        String messageType = message.getString(ParseConstants.KEY_FILE_TYPE);
+        // get the ParseFile or the message
         ParseFile file = message.getParseFile(ParseConstants.KEY_FILE);
         // create a Uri and set it to the files URL
         Uri fileUri = Uri.parse(file.getUrl());
 
         // check if message type is image
-        if(messageType.equals(ParseConstants.TYPE_IMAGE)){
+        if (messageType.equals(ParseConstants.TYPE_IMAGE)) {
             // view the image in the ViewImageActivity
-            Intent intent = new Intent(getActivity(),ViewImageActivity.class);
+            Intent intent = new Intent(getActivity(), ViewImageActivity.class);
             intent.setData(fileUri); // set the date of the intent with the file uri
             startActivity(intent);
 
 
-        }
-
-        else{
+        } else {
             // view the video
             Intent intent = new Intent(Intent.ACTION_VIEW, fileUri);
             intent.setDataAndType(fileUri, "video/*");
             startActivity(intent);
 
+
+        }
+
+        // Delete the message
+        List<String> ids = message.getList(ParseConstants.KEY_RECIPIENT_IDS); // get the recipient ids and store in list
+
+        // check the count of the recipients
+        if (ids.size() == 1) {
+            // last recipient delete the whole thing
+            message.deleteInBackground();
+        }
+        else{
+            // remove the recipient and save
+            ids.remove(ParseUser.getCurrentUser().getObjectId());
+
+            ArrayList<String> idsToRemove = new ArrayList<String>();
+            idsToRemove.add(ParseUser.getCurrentUser().getObjectId());
+
+            message.removeAll(ParseConstants.KEY_RECIPIENT_IDS, idsToRemove);
+            message.saveInBackground();
 
 
         }
